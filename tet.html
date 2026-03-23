@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Final Ritual - perfume.studio.kk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Cinzel:wght@400&family=Sarabun:wght@100;200;300;400&display=swap" rel="stylesheet">
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCL_MS2ljbEkN6uwoMyUNMS3h51FGKQ_CI",
+            authDomain: "my-payment-system-6d306.firebaseapp.com",
+            projectId: "my-payment-system-6d306",
+            storageBucket: "my-payment-system-6d306.firebasestorage.app",
+            messagingSenderId: "438130852996",
+            appId: "1:438130852996:web:e4b219aea61ecdce62aed1",
+            measurementId: "G-0X34QG80JS"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.db = db;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.serverTimestamp = serverTimestamp;
+    </script>
+
+    <style>
+        body { background-color: #0d041a; color: white; font-family: 'Sarabun', sans-serif; overflow-x: hidden; }
+        .font-calligraphy { font-family: 'Pinyon Script', cursive; }
+        .font-elegant { font-family: 'Cinzel', serif; }
+        .page-bg { position: fixed; inset: 0; background-image: url('https://scontent.fbkk5-6.fna.fbcdn.net/v/t39.30808-6/506046049_725940627045932_9161134506939914429_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=13d280&_nc_ohc=CopkT0fHXZUQ7kNvwHAZ4s3&_nc_oc=Adkdqu9aC_Ek4YDIntV6kJNGC9sxBTbPKH4CBqIMGzbDWAR0wDlc61x43pY1B9zvOxw&_nc_zt=23&_nc_ht=scontent.fbkk5-6.fna&_nc_gid=tkfhD_DC-VT1rcsNGoVEMw&_nc_ss=8&oh=00_AfzYciIvv7PGIri64wftBDRkaualj6_t2Nx33Ephy0ZEuA&oe=69BEF8CB'); background-size: cover; background-position: center; filter: blur(50px) brightness(0.4); transform: scale(1.1); z-index: -1; }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 40px; padding: 2.5rem; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        .input-ritual { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 15px; padding: 12px 20px; width: 100%; outline: none; transition: 0.4s; color: #fff; }
+        .input-ritual:focus { border-color: #d4af37; background: rgba(255, 255, 255, 0.05); }
+        .slip-preview-container { width: 100%; aspect-ratio: 3/4; border: 1px dashed rgba(212, 175, 55, 0.3); border-radius: 20px; margin-top: 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: rgba(0,0,0,0.2); }
+        #preview-img { width: 100%; height: 100%; object-fit: contain; display: none; }
+        .btn-confirm { background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); color: black; border-radius: 30px; transition: 0.5s; font-weight: bold; letter-spacing: 0.2em; }
+        .btn-confirm:disabled { opacity: 0.5; }
+        
+        /* Success Screen */
+        #success-screen { display: none; position: fixed; inset: 0; z-index: 50; background: #0d041a; align-items: center; justify-content: center; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="page-bg"></div>
+
+    <div id="success-screen" class="p-6">
+        <div class="max-w-md">
+            <span class="font-calligraphy text-[#d4af37] text-6xl mb-4 block">Thank You</span>
+            <h2 class="font-elegant text-2xl mb-6 tracking-[0.3em]">Ritual Completed</h2>
+            <p class="text-gray-400 text-sm mb-10 leading-relaxed">
+                เราได้รับข้อมูลการชำระเงินของคุณแล้ว<br>
+                ทีมงานจะตรวจสอบสลิปและดำเนินการจัดส่งน้ำหอม<br>
+                ภายใน 24 ชั่วโมง
+            </p>
+            <button onclick="window.location.href='index.html'" class="btn-confirm px-10 py-3 text-xs uppercase">
+                Back to Home
+            </button>
+        </div>
+    </div>
+
+    <main id="main-content" class="relative z-10 min-h-screen flex items-center justify-center py-10 px-6">
+        <div class="max-w-5xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            
+            <div class="glass-panel">
+                <header class="mb-8">
+                    <span class="font-calligraphy text-[#d4af37] text-3xl mb-1 block">Shipping</span>
+                    <h2 class="font-elegant text-xl tracking-[0.3em] uppercase">Address Details</h2>
+                </header>
+                <div class="space-y-5">
+                    <input type="text" id="cust-name" placeholder="ชื่อ-นามสกุล" class="input-ritual">
+                    <input type="tel" id="cust-phone" placeholder="เบอร์โทรศัพท์" class="input-ritual">
+                    <textarea id="cust-address" rows="4" placeholder="ที่อยู่จัดส่งโดยละเอียด" class="input-ritual"></textarea>
+                </div>
+                <div class="mt-10 pt-6 border-t border-white/10 flex justify-between text-xs font-elegant text-[#d4af37] tracking-[0.2em]">
+                    <span>Grand Total</span>
+                    <span id="total-price">THB 590.00</span>
+                </div>
+            </div>
+
+            <div class="glass-panel flex flex-col items-center text-center">
+                <header class="mb-6">
+                    <span class="font-calligraphy text-[#d4af37] text-3xl mb-1 block">Payment</span>
+                    <h2 class="font-elegant text-xl tracking-[0.3em] uppercase">Verification</h2>
+                </header>
+                <div class="bg-white p-3 rounded-2xl mb-4">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=0812345678" class="w-32 h-32">
+                </div>
+                <p class="text-[10px] text-gray-400 font-elegant mb-6 tracking-widest uppercase italic">K-BANK: 123-4-56789-0 (KK Studio)</p>
+
+                <div class="w-full">
+                    <input type="file" id="slip-upload" accept="image/*" class="hidden">
+                    <button onclick="document.getElementById('slip-upload').click()" class="w-full py-3 border border-dashed border-[#d4af37]/40 rounded-2xl text-[10px] text-[#d4af37] uppercase tracking-[0.2em]">
+                        Select Payment Slip
+                    </button>
+                    <div class="slip-preview-container">
+                        <div id="placeholder-text" class="text-[10px] text-gray-600 uppercase tracking-widest">No slip selected</div>
+                        <img id="preview-img" src="">
+                    </div>
+                </div>
+
+                <button id="final-btn" onclick="submitRitual()" class="btn-confirm w-full mt-8 py-4 text-xs uppercase shadow-[0_0_20px_rgba(212,175,55,0.2)]">
+                    Verify & Confirm Order
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const slipInput = document.getElementById('slip-upload');
+        const previewImg = document.getElementById('preview-img');
+        const placeholderText = document.getElementById('placeholder-text');
+        let compressedBase64 = "";
+
+        // ระบบบีบอัดรูปภาพให้ไม่เกิน 1MB
+        slipInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 800; // ปรับความกว้างพอดีๆ
+                        const scaleSize = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scaleSize;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                        // บีบอัดเหลือคุณภาพ 0.6 (60%) ไฟล์จะเหลือแค่ประมาณ 100-300KB
+                        compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+                        previewImg.src = compressedBase64;
+                        previewImg.style.display = 'block';
+                        placeholderText.style.display = 'none';
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        async function submitRitual() {
+            const btn = document.getElementById('final-btn');
+            const name = document.getElementById('cust-name').value;
+            const phone = document.getElementById('cust-phone').value;
+            const address = document.getElementById('cust-address').value;
+
+            if(!name || !phone || !address || !compressedBase64) {
+                alert("กรุณากรอกข้อมูลและแนบสลิปให้ครบถ้วน");
+                return;
+            }
+
+            btn.innerText = "SENDING TO SPIRITS...";
+            btn.disabled = true;
+
+            try {
+                await window.addDoc(window.collection(window.db, "orders"), {
+                    customerName: name,
+                    customerPhone: phone,
+                    shippingAddress: address,
+                    totalPrice: 590,
+                    slipImage: compressedBase64,
+                    status: "pending",
+                    createdAt: window.serverTimestamp()
+                });
+
+                // เปลี่ยนหน้าไปหน้าสำเร็จ
+                document.getElementById('main-content').style.display = 'none';
+                document.getElementById('success-screen').style.display = 'flex';
+                localStorage.clear();
+
+            } catch (error) {
+                console.error(error);
+                alert("เกิดข้อผิดพลาด: " + error.message);
+                btn.disabled = false;
+                btn.innerText = "Verify & Confirm Order";
+            }
+        }
+    </script>
+</body>
+</html>
